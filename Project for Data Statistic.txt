@@ -1,0 +1,206 @@
+#install required packages
+install.packages("xlsx")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("nortest")
+
+# loading the packages
+library("readxl")
+libray("dplyr")
+library("nortest")
+library("ggplot2")
+
+Athlete_data<- read.csv("Athlete Data  .csv")
+
+# summary statistics
+summary(Athlete_data)
+
+#view dimensions of the Athlete data 
+dim(Athlete_data)
+
+#count total missing values in each column of data frame
+sapply(Athlete_data, function(x) sum(is.na(x)))
+
+# creat bar chart of sex
+ggplot(Athlete_data, aes(x= Sex, fill = Sex)) + geom_bar() 
+
+# pie chart 
+pie(Athlete_data$Sport,main = "Sport Types",
+col = hcl.colors(length(Athlete_data$Sport), "BluYl"))
+
+
+#
+ggplot(Athlete_data, aes(x= Sport, fill= Sex)) + geom_bar(position = "dodge")
+
+# perform a chi-square test,
+chi_test <- chisq.test(ct)
+chi_test
+
+
+
+df_stat <- Athlete_data  %>% group_by(Athlete_data$Sex) %>% summarize( count = n(), mean = mean(%Bfat, na.rm = TRUE), sd = sd(%Bfat, na.rm = TRUE))
+
+
+one.way_LBM <- aov(LBM~ Sport, data = Athlete_data)
+summary(one.way_LBM)
+
+levels(Athlete_data$Sport)
+levels(Athlete_data$Sport)
+length(levels(Athlete_data$Sport))
+Athlete_data % > %
+group_by(Sport) % > %
+summarise(
+count_Hc = n(),
+mean_Hc = mean(Hc, na.rm = TRUE),
+sd_Hc = sd(Hc, na.rm = TRUE)
+)
+Athlete_data % > % group_by(Sport) % > % summarise(count_Hc = n(), mean_Hc = mean(Hc, na.rm = TRUE), sd_Hc = sd(Hc, na.rm = TRUE))
+Hc_stat <-Athlete_data % > % group_by(Sport) % > % summarise(count_Hc = n(), mean_Hc = mean(Hc, na.rm = TRUE), sd_Hc = sd(Hc, na.rm = TRUE))
+ggplot(Athlete_data, aes(x = Sport, y = Hc, fill = Sport)) + geom_boxplot() + geom_jitter(shape = 15, color = "steelblue",position = position_jitter(0.21)) + theme_classic()
+ggplot(Athlete_data, aes(x = Sport, y = Hc, fill = Sport)) + geom_boxplot() + geom_jitter(shape = 15, color = "steelblue",position = position_jitter(0.21))
+ggplot(Athlete_data, aes(x = Sport, y = Hc, fill = Sport)) + geom_boxplot() + geom_jitter(shape = 15, color = "steelblue",position = position_jitter(0.21)) + theme_classic()
+
+
+
+pairs(Athlete_data)
+mycor<-cor(Athlete_data)
+
+
+
+# create a contingency table
+ct<- table(Athlete_data$Sex, Athlete_data$Sport)
+# view the contingency table
+ct
+#add margins to the contingency table
+ct_m <- addmargins(ct)
+# view the contingency table
+ct_m
+
+# perform two-way ANOVA to ascertain whether the athlete's sex and sport are important variables in determining the plasma ferritin concentration
+ # Two-way ANOVA whereWe want to know if sport type, gender, or the interaction between sport and gender determining the plasma ferritin concentration
+> aov2_test<-aov(Ferr~Sex+Sport+Sex*Sport, data= Athlete_data)
+> summary(aov2_test)
+
+# convert Sex and Sport data type from a character to a factor vector
+Athlete_data$Sex<- as.factor(Athlete_data$Sex)
+Athlete_data$Spor<- as.factor(Athlete_data$Sport)
+
+# change %Bfat name
+names(Athlete_data)[names(Athlete_data)=="%Bfat"] <- "Bfat"
+
+
+ Athlete_data %>% group_by(Athlete_data$Sex) %>%summarize(count = n(),mean = mean(Athlete_data$Bfat, na.rm = TRUE),sd = sd(Athlete_data$Bfat, na.rm = TRUE))
+
+# run t- test to see if there is no difference in means of bodyfat percentage between male and female athletes 
+
+BFat_test<-t.test(Bfat~Sex, data= Athlete_data)
+BFat_test
+
+#Multiple Linear Regression 
+
+set.seed(1)
+#set 70% of dataset as training set and 30% as test set
+ sample <- sample(c(TRUE, FALSE), nrow(Athlete_data), replace=TRUE, prob=c(0.7,0.3))
+train  <- Athlete_data[sample, ]
+test  <- Athlete_data[!sample, ]
+#view dimensions of the training set
+dim(train)
+#view dimensions of the test set
+dim(test)
+
+#set up a mutiple  linear regression model where Plasma ferritin  is the dependent variable which varies with independent variables: Sex, Sport, RCC, WCC, Hc, Hg, BMI, SSF, Bfat, LBM, Ht, Wt and Wt
+model_Ferr<-lm(data= Athlete_data, Ferr ~ Sex+Sport+RCC+WCC+Hc+Hg+BMI+SSF+ Bfat+LBM+Ht+ Wt)
+
+summary(model_Ferr)
+
+
+# Get the Ferr model residuals
+model_residuals = model_Ferr$residuals
+# Plot the  Ferr model residuals
+hist(model_residuals, xlab="The residuals",ylab="Frequency", col = "blue")
+
+# Plot the residuals
+qqnorm(model_residuals)
+# Plot the Q-Q line     
+qqline(model_residuals)
+#plot predicted values vs residuals
+plot(predict.lm(model_Ferr),model_residuals,xlab="Fitted values",ylab="Residual")
+#  view value of residual = 0 with  horizontal line t
+abline(h=0)
+#and to test independence of observations plot residual in order of observation 
+plot (seq(1,length(model_residuals),1),model_residuals,xlab="Observation Order",ylab="Residual",type="b")
+# dashed horizontal line to show where residual = 0
+abline(h=0,lty=2)
+ # plot fitted (predicted)  plasma ferritin concentration  vs actual  plasma ferritin concentration
+plot(train$Ferr,predict.lm(model_Ferr),xlab="plasma ferritin concentration",ylab="Fitted plasma ferritin concentration")
+abline(0,1,lty=2)
+
+
+# perform the Anderson-Darling test
+ad.test(model_residuals)
+
+
+
+
+with(train, {
+     # RCC
+    plot(RCC,model_residuals,xlab="red cell count",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # WCC
+     plot(WCC,model_residuals,xlab="white cell count",ylab="model_Ferrresiduals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # Hc
+     plot(Hc,model_residuals,xlab="Hematocrit",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # Hg
+     plot(Hg,model_residuals,xlab="Hemoglobin",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # BMI
+     plot(BMI,model_residuals,xlab="body mass index",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # SSF
+     plot(SSF,model_residuals,xlab="sum of skin folds",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # Bfat
+     plot(Bfat,model_residuals,xlab="body fat percentage",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # LBM
+     plot(Bfat,model_residuals,xlab="lean body mass",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # Ht
+     plot(Ht,model_residuals,xlab="Height",ylab="model_Ferrresiduals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+     # Wt
+     plot(Wt,model_residuals,xlab="Weight",ylab="model_Ferr residuals")
+     # horizontal line to show value of residual = 0
+     abline(h=0)
+ })
+
+with(train, {
+# try the drop1() function
+drop1(model_Ferr,test="F")
+})
+
+
+
+# try the step() function backwards to test our model selection
+with(train, {
+step(Ferr__model,direction="backward")
+})
+
+
+#set up a multiple  linear regression model where Plasma ferritin  is the dependent variable which varies with independent variables: Sex
+second_Ferrmodel<-lm(data= train, Ferr ~ Sex)
+summary(second_Ferrmodel)
+# Finally set up a multiple  linear regression model where Plasma ferritin  is the dependent variable which varies with independent variables: Sex+Bfat+Ht+Wt
+third_Ferrmodel<- lm (train, Ferr ~ Sex+Bfat+Ht+Wt) 
+summary(third_Ferrmodel)
